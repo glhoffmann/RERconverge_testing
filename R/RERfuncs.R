@@ -842,7 +842,7 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
         if(!is.null(winsorizetrait)){
           y=win(charP[ii], winsorizetrait)
         }else{
-          y=charP[indstouse]
+          y=charP[ii]
         }
       }
       
