@@ -761,7 +761,7 @@ kwdunn.test <- function(x,g, ncategories){
 #' @export
 getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeRER=NULL, winsorizetrait=NULL,
                       weighted=F, bootstrap=F, bootn = 1000){
-  # behold, the polished more readable getAllCor mk. III! -GH
+  # behold, the polished more readable getAllCor mk. III!
   RERna=(apply(is.na(RERmat),2,all))
   iicharPna=which(is.na(charP))
   if(!all(RERna[iicharPna])){
@@ -775,22 +775,22 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
   if (method=="s" && weighted){stop("Error: weighted Spearman correlation currently not supported")}
   if (method=="kw" && weighted){stop("Error: weighted Kruskall/Wallis correlation currently not supported")}
   if (method=="aov" && weighted){stop("Error: weighted ANOVA correlation currently not supported")}
-  if (method!="p" && weighted){stop("Error: currently, for a weighted correlation, only a pearson correlation is supported. Input method=\"p\".")}
-
+  if (method!="p" && weighted){stop("Error: currently, only a weighted pearson correlation is supported. Input method=\"p\".")}
+  
   win=function(x,n){
     #windsorizing: outlier control. sets the n highest values to the n+1th highest, same with lows
     xs=sort(x[!is.na(x)], decreasing = T)
     #npo: n plus one
     npomax=xs[n+1]
     npomin=xs[length(xs)-n]
-
+    
     x[x>npomax]=npomax
     x[x<npomin]=npomin
     x
   }
   corout=matrix(nrow=nrow(RERmat), ncol=3)
   rownames(corout)=rownames(RERmat)
-
+  
   ##############################################################################
   # make tables for each pairwise comparison & a list for the tables
   if (method == "aov" || method == "kw") {
@@ -811,17 +811,17 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
     }
   }
   ##############################################################################
-
+  
   colnames(corout)=c("Rho", "N", "P")
-
+  
   for( i in 1:nrow(corout)){
-
-    # ii : Intersect Indexes
+    
+    # ii : Intersect Indexes:
     # binary vector of places where the phenotype vector and RER are not NA: valid indexes
     ii<-!is.na(charP)&!is.na(RERmat[i,])
     if((nb<-sum(ii))>=min.sp){
       #checks that there are >= min.sp species in each category
-
+      
       ##########################################################################
       if(method =="kw" || method =="aov") {
         counts = table(charP[ii])
@@ -834,19 +834,14 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
       else if (method!="p"&&sum(charP[ii]!=0)<min.pos){
         next
       }
-
-      ########################################################################## setup for unweighted v
-      if (!weighted){
-        x=RERmat[i,ii]
-        #winsorize
-        if(!is.null(winsorizeRER)){
-          x=win(x, winsorizeRER)
-        }
-        if(!is.null(winsorizetrait)){
-          y=win(charP[ii], winsorizetrait)
-        }else{
-          y=charP[ii]
-        }
+      
+      ########################################################################## winsorization setup v
+      x=RERmat[i,ii]
+      if(!is.null(winsorizeRER)){ x=win(x, winsorizeRER) }
+      if(!is.null(winsorizetrait)){
+        y=win(charP[ii], winsorizetrait)
+      }else{
+        y=charP[ii]
       }
 
       ########################################################################## AOV unweighted v
@@ -879,7 +874,7 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
             names(tables)[unnamedinds][1:length(newnamesinds)] = groups[newnamesinds]
           }
         }
-
+        
         # add data to the named tables
         for(k in 1:length(groups)) {
           name = groups[k]
@@ -891,12 +886,12 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
       ########################################################################## v KW unweighted
       else if (!weighted && method == "kw") {
         # Kruskal Wallis/Dunn test
-
+        
         yfacts = factor(y)
         kres = kwdunn.test(x, yfacts, ncategories = lu)
         effect_size = kres$kw$H/(nb - 1)
         corout[i, 1:3] = c(effect_size, nb, kres$kw$p)
-
+        
         for(k in 1:length(kres$dunn$Z)){ # length of kres$dunn$Z should be the same as length(tables) otherwise there's a problem
           tables[[k]][i, "Rho"] = kres$dunn$Z[k]
           tables[[k]][i, "P"] = kres$dunn$P.adjust[k]
@@ -912,18 +907,14 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
       ########################################################################## ^ Other (k,p,s) unweighted
       ########################################################################## v Other weighted
       else if (weighted){
+        
+        #skip iteration if the phenotype vector has no good intersects (distinct from the NA filter earlier)
+        if(sum(y) == 0) { next }
 
-        #skip iteration if the phenotype vector has no good intersects
-        if(sum(charP[ii]) == 0) { next }
-
-        x=RERmat[i,ii]
-        #winsorize check
-        if(!is.null(winsorizeRER)){ x=win(x, winsorizeRER) }
-
-        charPb=(charP[ii]>0)+1-1
-        weights=charP[ii]
+        charPb=(y>0)+1-1
+        weights=y
         weights[weights==0]=1
-
+        
         #if not bootstrapped, it'll run as normal
         cres=wtd.cor(x, charPb, weight = weights, mean1 = F, bootse=bootstrap, bootn=bootn)
         #Spit back out Rho/correlation, N, and pvalue (which for some reason is a different index if you bootstrap?)
@@ -932,7 +923,7 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
       ########################################################################## ^ Other weighted
     }
   }
-
+  
   wt = " unweighted"
   ws = ""
   m <- " Pearson"
@@ -951,7 +942,7 @@ getAllCor=function(RERmat, charP, method="auto",min.sp=10, min.pos=2, winsorizeR
     if (method == "k") m <- " Kendall"
   }
   message(paste("Used a",n, ws, wt, m, " correlation.",sep=""))
-
+  
   corout=as.data.frame(corout)
   corout$p.adj=p.adjust(corout$P, method="BH")
   if (method == "aov" || method == "kw") {
