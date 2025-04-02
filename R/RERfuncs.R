@@ -602,7 +602,7 @@ getChildren=function(tree, nodeN){
 #' @param bootstrap toggle bootstrapping (for weighted pearson correlation)
 #' @param bootn number of runs to use when bootstrapping. Will be ignored if bootstrap is false.
 #' @export
-correlateWithBinaryPhenotype=function(RERmat,charP, min.sp=10, min.pos=2, weighted="auto",winsorize=NULL, bootstrap=F, bootn=1000){
+correlateWithBinaryPhenotype=function(RERmat,charP, min.sp=10, min.pos=2, weighted="auto",winsorizeRER=NULL, winsorizetrait=NULL, bootstrap=F, bootn=1000){
   if(weighted=="auto"){
     if (any(charP>0&charP<1, na.rm=TRUE)){
       message("Fractional values detected, will use weighted correlation mode")
