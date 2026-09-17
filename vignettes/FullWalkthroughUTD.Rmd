@@ -55,7 +55,7 @@ For a more detailed description of data formatting requirements and examples, pl
 
 In R, load the RERConverge library.
 
-```{r results='hide', message = FALSE, warning = FALSE, cache = TRUE}
+```{r results='hide', message=FALSE, warning=FALSE, cache = TRUE}
 if (!require("RERconverge", character.only=T, quietly=T)) {
     require(devtools)
     install_github("nclark-lab/RERconverge", ref="master") 
@@ -135,24 +135,38 @@ newmamRERw = readRDS("mamRERw.rds")
 
 Now that we have RERs, we can visualize these for any given gene using the `plotRers` function. Here is an example.
 
-```{r fig1, fig.height=9,fig.width=10, warning = FALSE, cache = TRUE, tidy = FALSE}
+```{r fig1, fig.height=9,fig.width=10, message=FALSE,warning = FALSE, cache = TRUE, tidy = FALSE}
 #make average and gene tree plots
 noneutherians <- c("Platypus","Wallaby","Tasmanian_devil","Opossum")
-par(mfrow=c(1,2))
-avgtree=plotTreeHighlightBranches(toyTrees$masterTree, outgroup=noneutherians,
+
+avgtree = plotTreeHighlightBranches(toyTrees$masterTree, outgroup=noneutherians,
                                   hlspecies=c("Vole","Squirrel"), hlcols=c("blue","red"), 
                                   main="Average tree") #plot average tree
-bend3tree=plotTreeHighlightBranches(toyTrees$trees$BEND3, outgroup=noneutherians, 
+
+bend3tree = plotTreeHighlightBranches(toyTrees$trees$BEND3, outgroup=noneutherians, 
                                     hlspecies=c("Vole","Squirrel"), hlcols=c("blue","red"), 
                                     main="BEND3 tree") #plot individual gene tree
+plot(avgtree)
+plot(bend3tree)
 ```
 
-The left plot is a tree with branch lengths representing the average rates across all genes. The right plot is the same tree, but with branch lengths representing rates specifically for the BEND3 gene.
+The first plot is a tree with branch lengths representing the average rates across all genes. The second plot is the same tree, but with branch lengths representing rates specifically for the BEND3 gene.
 
-```{r fig2, fig.height=9,fig.width=10, warning = FALSE, cache = TRUE, tidy = FALSE}
+Now, we'll move onto creating a phenotype vector. The function `foreground2Paths` creates a phenotype vector of all paths that lead only to foreground species. A quick check of some (arbitrary) relevant indices in this case reveal that they're denoted with 0 and 1 - this is binary data. Later we will discuss continuous phenotypes.
+
+```{r, fig.height=9,fig.width=10, warning = FALSE, cache = TRUE, tidy = FALSE}
 #plot RERs
 par(mfrow=c(1,1))
 phenvExample <- foreground2Paths(c("Vole","Squirrel"),toyTrees,clade="terminal")
+phenvExample[590:620]
+```
+
+
+
+
+Now we're ready to plot our RERs
+
+```{r fig2, fig.height=9,fig.width=10, warning = FALSE, cache = TRUE, tidy = FALSE}
 plotRers(mamRERw,"BEND3",phenv=phenvExample) #plot RERs
 ```
 
