@@ -67,9 +67,14 @@ readTrees=function(file, max.read=NA, masterTree=NULL, minTreesAll=20, reestimat
       }
       
       #check if it has more species
-      if(length(trees[[i/2]]$tip.label)>maxsp){
+      # if(length(trees[[i/2]]$tip.label)>maxsp){
+      #   allnames = unique(c(allnames,trees[[i/2]]$tip.label))
+      #   maxsp = length(allnames)
+      # }
+      if (sum(trees[[i/2]]$tip.label %in% allnames == F) > 0) {
         allnames = unique(c(allnames,trees[[i/2]]$tip.label))
         maxsp = length(allnames)
+        
       }
     }
     
